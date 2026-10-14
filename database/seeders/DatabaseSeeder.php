@@ -21,6 +21,16 @@ class DatabaseSeeder extends Seeder
         // 1. Departments of Faculty of Science - University of Tripoli
         $departmentsData = [
             [
+                'name_ar' => 'قسم الرياضيات',
+                'name_en' => 'Department of Mathematics',
+                'code' => 'MATH',
+                'description' => 'تدريس الرياضيات البحتة والتطبيقية والتحليل العددي والنماذج الرياضية.',
+                'email' => 'math.science@uot.edu.ly',
+                'phone' => '+218 21 462 7804',
+                'office_location' => 'مبنى كلية العلوم - الطابق الثاني',
+                'icon' => 'bi-calculator',
+            ],
+            [
                 'name_ar' => 'قسم الحاسوب',
                 'name_en' => 'Department of Computer Science',
                 'code' => 'CS',
@@ -49,16 +59,6 @@ class DatabaseSeeder extends Seeder
                 'phone' => '+218 21 462 7803',
                 'office_location' => 'مبنى كلية العلوم - الطابق الأرضي',
                 'icon' => 'bi-lightning-charge',
-            ],
-            [
-                'name_ar' => 'قسم الرياضيات',
-                'name_en' => 'Department of Mathematics',
-                'code' => 'MATH',
-                'description' => 'تدريس الرياضيات البحتة والتطبيقية والتحليل العددي والنماذج الرياضية.',
-                'email' => 'math.science@uot.edu.ly',
-                'phone' => '+218 21 462 7804',
-                'office_location' => 'مبنى كلية العلوم - الطابق الثاني',
-                'icon' => 'bi-calculator',
             ],
             [
                 'name_ar' => 'قسم الإحصاء',

@@ -81,4 +81,22 @@ class ExampleTest extends TestCase
         $response->assertSessionHas('deleted', 'تم حذف الاستفسار بنجاح.');
         $this->assertDatabaseMissing('inquiries', ['id' => $inquiry->id]);
     }
+
+    public function test_mathematics_department_is_first_in_the_list(): void
+    {
+        $this->seed();
+
+        $response = $this->get('/');
+        $response->assertStatus(200);
+
+        $departments = $response->viewData('departments');
+        $this->assertNotEmpty($departments);
+        $this->assertEquals('MATH', $departments->first()->code);
+        $this->assertEquals('قسم الرياضيات', $departments->first()->name_ar);
+
+        $adminResponse = $this->get('/admin');
+        $adminResponse->assertStatus(200);
+        $adminDepartments = $adminResponse->viewData('departments');
+        $this->assertEquals('MATH', $adminDepartments->first()->code);
+    }
 }

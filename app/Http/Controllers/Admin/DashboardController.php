@@ -45,7 +45,7 @@ class DashboardController extends Controller
             'inquiries as answered_count' => function ($q) {
                 $q->where('status', 'answered');
             }
-        ])->where('is_active', true)->get();
+        ])->where('is_active', true)->ordered()->get();
 
         return view('admin.dashboard', compact(
             'totalInquiries',

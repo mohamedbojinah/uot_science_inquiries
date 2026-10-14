@@ -18,7 +18,7 @@ class FaqAdminController extends Controller
 
     public function create()
     {
-        $departments = Department::where('is_active', true)->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
         $categories = InquiryCategory::where('is_active', true)->get();
         return view('admin.faqs.create', compact('departments', 'categories'));
     }
@@ -45,7 +45,7 @@ class FaqAdminController extends Controller
     public function edit(int $id)
     {
         $faq = Faq::findOrFail($id);
-        $departments = Department::where('is_active', true)->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
         $categories = InquiryCategory::where('is_active', true)->get();
         return view('admin.faqs.edit', compact('faq', 'departments', 'categories'));
     }

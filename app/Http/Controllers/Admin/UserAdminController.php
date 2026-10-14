@@ -14,7 +14,7 @@ class UserAdminController extends Controller
     public function index()
     {
         $users = User::with('department')->latest()->paginate(15);
-        $departments = Department::where('is_active', true)->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
 
         return view('admin.users.index', compact('users', 'departments'));
     }

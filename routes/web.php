@@ -17,11 +17,11 @@ use Illuminate\Support\Facades\Route;
 // =========================================================================
 Route::get('/', function () {
     try {
-        $departments = Department::where('is_active', true)->orderBy('name_ar')->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
     } catch (\Throwable $e) {
         Artisan::call('migrate', ['--force' => true]);
         Artisan::call('db:seed', ['--force' => true]);
-        $departments = Department::where('is_active', true)->orderBy('name_ar')->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
     }
     return view('visitor_showcase', compact('departments'));
 })->name('visitors');
@@ -73,11 +73,11 @@ Route::post('/submit-inquiry', function (Request $request) {
 // =========================================================================
 Route::get('/admin', function (Request $request) {
     try {
-        $departments = Department::where('is_active', true)->orderBy('name_ar')->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
     } catch (\Throwable $e) {
         Artisan::call('migrate', ['--force' => true]);
         Artisan::call('db:seed', ['--force' => true]);
-        $departments = Department::where('is_active', true)->orderBy('name_ar')->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
     }
 
     $query = Inquiry::with('department')->latest();

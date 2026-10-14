@@ -12,7 +12,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $departments = Department::where('is_active', true)->orderBy('id')->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
         $categories = InquiryCategory::where('is_active', true)->orderBy('display_order')->get();
         $faqs = Faq::where('is_published', true)->orderBy('display_order')->take(6)->get();
 

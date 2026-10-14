@@ -11,7 +11,7 @@ class FaqController extends Controller
 {
     public function index(Request $request)
     {
-        $departments = Department::where('is_active', true)->orderBy('id')->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
         $categories = InquiryCategory::where('is_active', true)->orderBy('display_order')->get();
 
         $query = Faq::with(['department', 'category'])->where('is_published', true);

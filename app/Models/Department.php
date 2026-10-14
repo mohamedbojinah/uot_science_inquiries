@@ -39,4 +39,11 @@ class Department extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    
+    public function scopeOrdered($query)
+    {
+        return $query->orderByRaw("CASE WHEN code = 'MATH' OR name_ar LIKE '%رياضيات%' THEN 0 ELSE 1 END")
+                     ->orderBy('name_ar');
+    }
 }

@@ -16,7 +16,7 @@ class InquiryController extends Controller
      */
     public function create()
     {
-        $departments = Department::where('is_active', true)->orderBy('id')->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
         $categories = InquiryCategory::where('is_active', true)->orderBy('display_order')->get();
 
         return view('inquiries.create', compact('departments', 'categories'));

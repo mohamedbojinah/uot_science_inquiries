@@ -11,7 +11,7 @@ class DepartmentController extends Controller
     {
         $departments = Department::withCount('inquiries')
             ->where('is_active', true)
-            ->orderBy('id')
+            ->ordered()
             ->get();
 
         return view('departments.index', compact('departments'));

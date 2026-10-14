@@ -18,7 +18,7 @@ class InquiryAdminController extends Controller
      */
     public function index(Request $request)
     {
-        $departments = Department::where('is_active', true)->orderBy('name_ar')->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
         $categories = InquiryCategory::where('is_active', true)->orderBy('display_order')->get();
 
         $query = Inquiry::with(['department', 'category', 'repliedBy']);
@@ -68,7 +68,7 @@ class InquiryAdminController extends Controller
     public function show(int $id)
     {
         $inquiry = Inquiry::with(['department', 'category', 'repliedBy', 'logs.user'])->findOrFail($id);
-        $departments = Department::where('is_active', true)->get();
+        $departments = Department::where('is_active', true)->ordered()->get();
 
         // If newly opened by staff and still 'new', mark as 'in_review'
         if ($inquiry->status === 'new') {

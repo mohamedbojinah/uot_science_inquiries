@@ -44,7 +44,7 @@ Route::post('/submit-inquiry', function (Request $request) {
         'full_name' => $validated['full_name'],
         'email' => $email ?? $validated['contact'],
         'phone' => $phone ?? $validated['contact'],
-        'department_id' => $validated['department_id'],
+        'department_id' => $validated['department_id'] ?? null,
         'subject' => \Illuminate\Support\Str::limit($validated['message'], 60, '...'),
         'message' => $validated['message'],
         'status' => 'new',

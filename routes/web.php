@@ -8,25 +8,28 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| موقع استفسارات كلية العلوم - جامعة طرابلس
+| موقع كلية العلوم - جامعة طرابلس (بوابة الزوار + لوحة الإدارة)
 |--------------------------------------------------------------------------
 */
 
-// 1. الصفحة الرئيسية: نموذج بسيط لإدخال واستقبال الاستفسارات
+// =========================================================================
+// 1. رابط الزوار: عرض تعريفي بكلية العلوم واستقبال أي سؤال أو استفسار
+// =========================================================================
 Route::get('/', function () {
     $departments = Department::where('is_active', true)->orderBy('name_ar')->get();
-    return view('simple_inquiry', compact('departments'));
-})->name('home');
+    return view('visitor_showcase', compact('departments'));
+})->name('visitors');
 
-// 2. معالجة وحفظ الاستفسار في قاعدة البيانات
+// إرسال وحفظ استفسار الزائر في قاعدة البيانات
 Route::post('/submit-inquiry', function (Request $request) {
     $validated = $request->validate([
         'full_name' => 'required|string|max:150',
         'contact' => 'required|string|max:150',
+        'sender_type' => 'nullable|string|in:student,freshman,alumnus,parent,other',
         'department_id' => 'nullable|exists:departments,id',
         'message' => 'required|string|min:5',
     ], [
-        'full_name.required' => 'يرجى كتابة اسمك الكامل.',
+        'full_name.required' => 'يرجى كتابة الاسم الكامل.',
         'contact.required' => 'يرجى إدخال البريد الإلكتروني أو رقم الهاتف للتواصل.',
         'message.required' => 'يرجى كتابة نص السؤال أو الاستفسار.',
         'message.min' => 'يرجى كتابة استفسار واضح (5 أحرف على الأقل).',
@@ -40,7 +43,7 @@ Route::post('/submit-inquiry', function (Request $request) {
 
     $inquiry = Inquiry::create([
         'tracking_code' => $trackingCode,
-        'sender_type' => 'student',
+        'sender_type' => $validated['sender_type'] ?? 'student',
         'full_name' => $validated['full_name'],
         'email' => $email ?? $validated['contact'],
         'phone' => $phone ?? $validated['contact'],
@@ -51,32 +54,114 @@ Route::post('/submit-inquiry', function (Request $request) {
         'ip_address' => $request->ip(),
     ]);
 
-    return back()->with('success_inquiry', [
+    return redirect('/#inquiry')->with('success_inquiry', [
         'name' => $inquiry->full_name,
         'code' => $inquiry->tracking_code,
         'department' => $inquiry->department ? $inquiry->department->name_ar : 'عام / إدارة الكلية',
     ]);
 })->name('inquiry.submit');
 
-// 3. صفحة بسيطة لعرض جميع الاستفسارات المخزنة في قاعدة البيانات
-Route::get('/inquiries', function () {
-    $inquiries = Inquiry::with('department')->latest()->paginate(20);
+
+// =========================================================================
+// 2. رابط الإدارة: مخصص لإدارة الكلية لاستعراض وفحص وحذف الاستفسارات
+// =========================================================================
+Route::get('/admin', function (Request $request) {
+    $departments = Department::where('is_active', true)->orderBy('name_ar')->get();
+
+    $query = Inquiry::with('department')->latest();
+
+    // البحث بالاسم أو وسيلة التواصل أو الرقم المرجعي
+    if ($request->filled('search')) {
+        $kw = '%' . trim($request->search) . '%';
+        $query->where(function ($q) use ($kw) {
+            $q->where('full_name', 'like', $kw)
+              ->orWhere('email', 'like', $kw)
+              ->orWhere('phone', 'like', $kw)
+              ->orWhere('tracking_code', 'like', $kw)
+              ->orWhere('message', 'like', $kw);
+        });
+    }
+
+    // التصفية حسب القسم
+    if ($request->filled('department_id')) {
+        $query->where('department_id', $request->department_id);
+    }
+
+    $inquiries = $query->paginate(20)->withQueryString();
+
     $totalCount = Inquiry::count();
-    return view('inquiries_list', compact('inquiries', 'totalCount'));
-})->name('inquiries.list');
+    $todayCount = Inquiry::whereDate('created_at', today())->count();
+    $studentCount = Inquiry::where('sender_type', 'student')->count();
+    $visitorCount = Inquiry::whereIn('sender_type', ['freshman', 'parent', 'other'])->count();
 
-// 4. حذف استفسار (لتنظيف البيانات إذا لزم)
-Route::delete('/inquiries/{id}', function ($id) {
+    return view('admin_inquiries', compact(
+        'inquiries',
+        'departments',
+        'totalCount',
+        'todayCount',
+        'studentCount',
+        'visitorCount'
+    ));
+})->name('admin');
+
+// تحويل /inquiries إلى /admin لسهولة الوصول
+Route::get('/inquiries', function () {
+    return redirect()->route('admin');
+});
+
+// حذف استفسار من قبل الإدارة
+Route::delete('/admin/inquiries/{id}', function ($id) {
     $inquiry = Inquiry::findOrFail($id);
+    $code = $inquiry->tracking_code;
     $inquiry->delete();
-    return back()->with('deleted', 'تم حذف الاستفسار بنجاح.');
-})->name('inquiries.delete');
+    return back()->with('deleted', "تم حذف الاستفسار ({$code}) بنجاح من قاعدة البيانات.");
+})->name('admin.delete');
 
-/*
-|--------------------------------------------------------------------------
-| مسارات التشغيل على منصة ريندر (مثل مشروع المستشفى hospital_equipment بالزبط)
-|--------------------------------------------------------------------------
-*/
+// تصدير كشف الاستفسارات بصيغة Excel / CSV
+Route::get('/admin/export', function () {
+    $inquiries = Inquiry::with('department')->latest()->get();
+
+    $headers = [
+        'Content-Type' => 'text/csv; charset=UTF-8',
+        'Content-Disposition' => 'attachment; filename="uot_science_inquiries_' . date('Y-m-d') . '.csv"',
+    ];
+
+    $callback = function () use ($inquiries) {
+        $file = fopen('php://output', 'w');
+        // UTF-8 BOM for Microsoft Excel
+        fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        fputcsv($file, [
+            'الرقم المرجعي',
+            'الاسم الكامل',
+            'الصفة',
+            'وسيلة التواصل',
+            'القسم المختص',
+            'نص الاستفسار',
+            'تاريخ وتوقيت الإرسال',
+        ]);
+
+        foreach ($inquiries as $item) {
+            fputcsv($file, [
+                $item->tracking_code,
+                $item->full_name,
+                $item->sender_type_label,
+                $item->email ?? $item->phone,
+                $item->department ? $item->department->name_ar : 'عام / الإدارة',
+                $item->message,
+                $item->created_at->format('Y-m-d H:i'),
+            ]);
+        }
+        fclose($file);
+    };
+
+    return response()->stream($callback, 200, $headers);
+})->name('admin.export');
+
+
+// =========================================================================
+// 3. مسارات التشغيل والتهيئة السحابية على منصة Render
+// =========================================================================
 Route::get('/setup-db', function () {
     try {
         if (config('database.default') === 'sqlite') {
@@ -96,12 +181,12 @@ Route::get('/setup-db', function () {
         ]);
 
         return response(
-            "<div style='font-family: Cairo, Tahoma, sans-serif; direction: rtl; text-align: center; padding: 40px 20px; background: #f0fdf4; color: #166534; border: 2px solid #bbf7d0; border-radius: 12px; max-width: 600px; margin: 50px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.06);'>
+            "<div style='font-family: Cairo, Tahoma, sans-serif; direction: rtl; text-align: center; padding: 40px 20px; background: #f0fdf4; color: #166534; border: 2px solid #bbf7d0; border-radius: 12px; max-width: 650px; margin: 50px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.06);'>
                 <h2 style='margin-bottom: 12px; color: #15803d;'>✅ تم تهيئة قاعدة البيانات بنجاح على منصة Render!</h2>
-                <p style='font-size: 16px; color: #374151; line-height: 1.8;'>تم تجهيز قاعدة البيانات لـ <strong>كلية العلوم - جامعة طرابلس</strong> بنجاح وأصبح الموقع جاهزاً لاستقبال الاستفسارات وتخزينها.</p>
-                <div style='margin-top: 25px;'>
-                    <a href='" . url('/') . "' style='display: inline-block; background: #0f2b48; color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;'>الانتقال لصفحة إدخال الاستفسار ➔</a>
-                    <a href='" . url('/inquiries') . "' style='display: inline-block; background: #0284c7; color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-right: 8px;'>عرض الاستفسارات المخزنة</a>
+                <p style='font-size: 16px; color: #374151; line-height: 1.8;'>تم تجهيز قاعدة البيانات لـ <strong>كلية العلوم - جامعة طرابلس</strong> بنجاح. أصبحت الروابط جاهزة للعمل فوراً:</p>
+                <div style='margin-top: 25px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;'>
+                    <a href='" . url('/') . "' style='display: inline-block; background: #0f2b48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;'>🌐 رابط الزوار (العرض التعريفي والاستفسار)</a>
+                    <a href='" . route('admin') . "' style='display: inline-block; background: #0284c7; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;'>🔐 رابط الإدارة (عرض الاستفسارات)</a>
                 </div>
             </div>"
         );

@@ -672,12 +672,6 @@
                 <li><a href="#about">عن الكلية</a></li>
                 <li><a href="#departments">الأقسام العلمية</a></li>
                 <li><a href="#inquiry">إرسال استفسار</a></li>
-                <li>
-                    <a href="{{ route('admin') }}" class="btn-admin" title="لوحة تحكم مخصصة لإدارة الكلية">
-                        <i class="bi-shield-lock-fill"></i>
-                        رابط الإدارة 🔐
-                    </a>
-                </li>
             </ul>
         </div>
     </nav>
@@ -851,15 +845,14 @@
                             <!-- Full Name -->
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label class="form-label" for="full_name">
-                                    الاسم الكامل <span style="color: #ef4444;">*</span>
+                                    الاسم الكامل (اختياري)
                                 </label>
                                 <input type="text" 
                                        name="full_name" 
                                        id="full_name" 
                                        class="form-control" 
-                                       placeholder="مثال: محمد علي الفرجاني" 
-                                       value="{{ old('full_name') }}" 
-                                       required>
+                                       placeholder="مثال: محمد علي (أو اتركه فارغاً)" 
+                                       value="{{ old('full_name') }}">
                             </div>
 
                             <!-- Visitor Type -->
@@ -868,11 +861,11 @@
                                     صفتك (اختياري)
                                 </label>
                                 <select name="sender_type" id="sender_type" class="form-select">
+                                    <option value="other">استفسار عام</option>
                                     <option value="student">طالب بكلية العلوم</option>
                                     <option value="freshman">طالب مستجد / زائر</option>
                                     <option value="alumnus">خريج الكلية</option>
                                     <option value="parent">ولي أمر</option>
-                                    <option value="other">استفسار عام</option>
                                 </select>
                             </div>
                         </div>
@@ -881,21 +874,20 @@
                             <!-- Contact -->
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label class="form-label" for="contact">
-                                    البريد الإلكتروني أو رقم الهاتف <span style="color: #ef4444;">*</span>
+                                    البريد الإلكتروني أو رقم الهاتف للتواصل (اختياري)
                                 </label>
                                 <input type="text" 
                                        name="contact" 
                                        id="contact" 
                                        class="form-control" 
-                                       placeholder="مثال: email@domain.com أو 0912345678" 
-                                       value="{{ old('contact') }}" 
-                                       required>
+                                       placeholder="مثال: 0912345678 أو email@domain.com" 
+                                       value="{{ old('contact') }}">
                             </div>
 
                             <!-- Department -->
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label class="form-label" for="department_id">
-                                    القسم المعني بالاستفسار
+                                    القسم المعني بالاستفسار (اختياري)
                                 </label>
                                 <select name="department_id" id="department_id" class="form-select">
                                     <option value="">-- عام / إدارة كلية العلوم --</option>
@@ -908,15 +900,15 @@
                             </div>
                         </div>
 
-                        <!-- Question / Inquiry -->
+                        <!-- Question / Inquiry (The ONLY Required Field) -->
                         <div class="form-group">
                             <label class="form-label" for="message">
-                                نص السؤال أو الاستفسار بالتفصيل <span style="color: #ef4444;">*</span>
+                                نص السؤال أو الاستفسار <span style="color: #ef4444; font-weight: 800;">* (مطلوب)</span>
                             </label>
                             <textarea name="message" 
                                       id="message" 
                                       class="form-control" 
-                                      placeholder="اكتب كل ما تريد الاستفسار عنه هنا بوضوح وسنقوم بمساعدتك..." 
+                                      placeholder="اكتب كل ما تريد الاستفسار عنه هنا بوضوح..." 
                                       required>{{ old('message') }}</textarea>
                         </div>
 
@@ -941,10 +933,7 @@
                 <p style="margin-top: 4px; font-size: 13px;">مجمع الكليات العلمية - باب العكرمي، طرابلس، ليبيا</p>
             </div>
             <div class="footer-copy">
-                <span>جاهز للتشغيل على منصة Render &bull; </span>
-                <a href="{{ route('admin') }}" style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 6px; color: #fde047;">
-                    <i class="bi-lock"></i> رابط الإدارة لعرض الاستفسارات
-                </a>
+                <span>كلية العلوم &copy; {{ date('Y') }} &bull; جميع الحقوق محفوظة</span>
             </div>
         </div>
     </footer>

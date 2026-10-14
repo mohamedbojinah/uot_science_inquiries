@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('tracking_code', 30)->unique();
             $table->string('sender_type')->default('student');
-            $table->string('full_name');
+            $table->string('full_name')->default('زائر')->nullable();
             $table->string('national_id_or_student_id')->nullable();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();

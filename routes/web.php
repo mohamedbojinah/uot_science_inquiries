@@ -23,30 +23,30 @@ Route::get('/', function () {
 // إرسال وحفظ استفسار الزائر في قاعدة البيانات
 Route::post('/submit-inquiry', function (Request $request) {
     $validated = $request->validate([
-        'full_name' => 'required|string|max:150',
-        'contact' => 'required|string|max:150',
+        'full_name' => 'nullable|string|max:150',
+        'contact' => 'nullable|string|max:150',
         'sender_type' => 'nullable|string|in:student,freshman,alumnus,parent,other',
         'department_id' => 'nullable|exists:departments,id',
-        'message' => 'required|string|min:5',
+        'message' => 'required|string|min:3',
     ], [
-        'full_name.required' => 'يرجى كتابة الاسم الكامل.',
-        'contact.required' => 'يرجى إدخال البريد الإلكتروني أو رقم الهاتف للتواصل.',
         'message.required' => 'يرجى كتابة نص السؤال أو الاستفسار.',
-        'message.min' => 'يرجى كتابة استفسار واضح (5 أحرف على الأقل).',
+        'message.min' => 'يرجى كتابة استفسار واضح (3 أحرف على الأقل).',
     ]);
 
-    // Check if contact is email or phone
-    $email = filter_var($validated['contact'], FILTER_VALIDATE_EMAIL) ? $validated['contact'] : null;
-    $phone = !$email ? $validated['contact'] : null;
+    $fullName = !empty(trim($validated['full_name'] ?? '')) ? trim($validated['full_name']) : 'زائر';
+    $contact = !empty(trim($validated['contact'] ?? '')) ? trim($validated['contact']) : null;
+
+    $email = ($contact && filter_var($contact, FILTER_VALIDATE_EMAIL)) ? $contact : null;
+    $phone = ($contact && !$email) ? $contact : null;
 
     $trackingCode = 'UOT-SCI-' . date('Y') . '-' . rand(1000, 9999);
 
     $inquiry = Inquiry::create([
         'tracking_code' => $trackingCode,
-        'sender_type' => $validated['sender_type'] ?? 'student',
-        'full_name' => $validated['full_name'],
-        'email' => $email ?? $validated['contact'],
-        'phone' => $phone ?? $validated['contact'],
+        'sender_type' => $validated['sender_type'] ?? 'other',
+        'full_name' => $fullName,
+        'email' => $email,
+        'phone' => $phone,
         'department_id' => $validated['department_id'] ?? null,
         'subject' => \Illuminate\Support\Str::limit($validated['message'], 60, '...'),
         'message' => $validated['message'],

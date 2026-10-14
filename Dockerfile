@@ -13,8 +13,19 @@ COPY . .
 # Install composer dependencies
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-# Set permissions
-RUN chown -R application:application .
+# Setup .env file if not present
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
-# Port 80 is exposed by default in webdevops/php-nginx
+# Generate app encryption key
+RUN php artisan key:generate --force
+
+# Create and populate SQLite database during build
+RUN mkdir -p database storage/framework/views storage/framework/sessions storage/framework/cache/data bootstrap/cache
+RUN touch database/database.sqlite
+RUN php artisan migrate --force --seed
+
+# Fix all permissions for Nginx and PHP-FPM
+RUN chown -R application:application /app
+RUN chmod -R 777 /app/storage /app/bootstrap/cache /app/database
+
 EXPOSE 80

@@ -548,10 +548,10 @@
                                         <div class="date-box">{{ $inq->created_at->format('h:i A') }}</div>
                                     </td>
                                     <td>
-                                        <form action="{{ route('admin.delete', $inq->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الاستفسار من قاعدة البيانات؟');">
+                                        <form action="{{ route('admin.delete', $inq->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn-delete" title="حذف من قاعدة البيانات">
+                                            <button type="submit" class="btn-delete" title="حذف">
                                                 <i class="bi-trash3"></i> حذف
                                             </button>
                                         </form>

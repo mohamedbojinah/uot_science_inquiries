@@ -124,9 +124,8 @@ Route::get('/inquiries', function () {
 // حذف استفسار من قبل الإدارة
 Route::delete('/admin/inquiries/{id}', function ($id) {
     $inquiry = Inquiry::findOrFail($id);
-    $code = $inquiry->tracking_code;
     $inquiry->delete();
-    return back()->with('deleted', "تم حذف الاستفسار ({$code}) بنجاح من قاعدة البيانات.");
+    return back()->with('deleted', "تم حذف الاستفسار بنجاح.");
 })->name('admin.delete');
 
 // تصدير كشف الاستفسارات بصيغة Excel / CSV

@@ -191,10 +191,9 @@ class InquiryAdminController extends Controller
         }
 
         $inquiry = Inquiry::findOrFail($id);
-        $code = $inquiry->tracking_code;
         $inquiry->delete();
 
-        return redirect()->route('admin.inquiries.index')->with('success', "تم حذف الاستفسار ({$code}) بنجاح.");
+        return redirect()->route('admin.inquiries.index')->with('success', "تم حذف الاستفسار بنجاح.");
     }
 
     /**

@@ -66,4 +66,19 @@ class ExampleTest extends TestCase
         $response->assertSee('لوحة تحكم الإدارة');
         $response->assertSee('زائر غير معروف');
     }
+
+    public function test_admin_can_delete_inquiry_and_sees_updated_message(): void
+    {
+        $inquiry = Inquiry::create([
+            'tracking_code' => 'UOT-SCI-2026-DEL',
+            'full_name' => 'زائر تجريبي',
+            'message' => 'سؤال سيتم حذفه.',
+            'status' => 'new',
+        ]);
+
+        $response = $this->delete("/admin/inquiries/{$inquiry->id}");
+
+        $response->assertSessionHas('deleted', 'تم حذف الاستفسار بنجاح.');
+        $this->assertDatabaseMissing('inquiries', ['id' => $inquiry->id]);
+    }
 }

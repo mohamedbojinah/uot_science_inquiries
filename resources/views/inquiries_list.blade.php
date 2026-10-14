@@ -344,7 +344,7 @@
                                         <div class="date-text">{{ $item->created_at->format('h:i A') }}</div>
                                     </td>
                                     <td>
-                                        <form action="{{ route('inquiries.delete', $item->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من رغبتك في حذف هذا الاستفسار من قاعدة البيانات؟');">
+                                        <form action="{{ route('inquiries.delete', $item->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn-delete" title="حذف">
